@@ -5,7 +5,7 @@ The aim of this project is to controll a water rocket with a Raspberry Pi Zero.
 A water rocket is a type of model rocket using water as its reaction mass.
 The water is forced out by a pressurized gas, typically compressed air. Like all rocket engines, it operates on the principle of Newton's third law of motion.
 
-## Whats special about our water rocket?
+## What's special about our water rocket?
 The fuel tank consists of a plastic bottle. This bottle can withstand a maximum pressure of 9 bar.
 In order to achieve a higher flight altitude, we have decided to strengthen this plastic bottle with fiber-reinforced tape.
 Whith this new tank we are able to reach pressures up to 13 bar.
