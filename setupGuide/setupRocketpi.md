@@ -21,6 +21,11 @@ This projekt is developed for a **Raspberry Pi Zero 2W**. You can also use an Ra
 - close `raspi.config` and reboot
 
 ## Clone Rocketpi-Projekt
-- install git / github
-- clone https://github.com/MartinFeichtinger/rocketpi
+- install git: `sudo apt install git`
+- `git clone https://github.com/MartinFeichtinger/rocketpi`
+- bei Änderungen mit `git commit` und `git push` hochladen (username and token erforderlich)
 
+## Configurate VS-Code
+- install vs-code on your ubuntu system
+- install the **C/C++** extention
+- install the **Remote Development** extention
