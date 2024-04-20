@@ -1,4 +1,4 @@
-# Rocketpi
+# RocketPi
 The aim of this project is to controll a water rocket with a Raspberry Pi Zero.
 
 ## What is a water rocket?
