@@ -7,6 +7,7 @@ To be able to use this library and program the GPIO-Pins, the pigpio package mus
 For more informations about pigpio: https://abyz.me.uk/rpi/pigpio/index.html
 
 ## GPIO-Pinout
+![GPIO-Pinout-Diagram-2](https://github.com/MartinFeichtinger/rocketpi/assets/110301453/dc339ea9-93fa-431a-84f1-a48d85bf69fd)
 
 
 ## Test programm
