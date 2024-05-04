@@ -11,3 +11,10 @@ For more informations about pigpio: https://abyz.me.uk/rpi/pigpio/index.html
 
 
 ## Test programm
+To test if the pigpio library is installed correctly you can use the `pigpioTest.c` programm.
+This programm will toggle the GPIO 17 between HIGH and LOW. 
+To make this visible you can use a led with a resistor connected to ground.
+
+- build up the test schematic
+- compile the test programm `gcc -Wall -pthread -o pigpioTest pigpioTest.c -lpigpiod_if2 -lrt`
+- run the programm with `./pigpioTest.c`
