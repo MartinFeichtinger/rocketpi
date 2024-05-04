@@ -25,7 +25,7 @@ This projekt is developed for a **Raspberry Pi Zero 2W**. You can also use an Ra
 - `git clone https://github.com/MartinFeichtinger/rocketpi`
 - bei Änderungen mit `git commit` und `git push` hochladen (username and token erforderlich)
 
-## Confituations for the GPIO-Programming
+## Configurations for the GPIO-Programming
 - install the pigpio library `sudo apt install pigpio`
 - setup the pigpio daemon to start at boot `sudo systemctl enable pigpiod`
 
