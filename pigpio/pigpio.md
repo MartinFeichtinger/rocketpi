@@ -17,4 +17,4 @@ To make this visible you can use a led with a resistor connected to ground.
 
 - build up the test schematic
 - compile the test programm `gcc -Wall -pthread -o pigpioTest pigpioTest.c -lpigpiod_if2 -lrt`
-- run the programm with `./pigpioTest.c`
+- run the programm with `./pigpioTest`
