@@ -10,7 +10,7 @@ For more informations about pigpio: https://abyz.me.uk/rpi/pigpio/index.html
 ![GPIO-Pinout-Diagram-2](https://github.com/MartinFeichtinger/rocketpi/assets/110301453/dc339ea9-93fa-431a-84f1-a48d85bf69fd)
 
 
-## Test programm
+## Test program
 To test if the pigpio library is installed correctly you can use the `pigpioTest.c` programm.
 This programm will toggle the GPIO 17 between HIGH and LOW. 
 To make this visible you can use a led with a resistor connected to ground.
