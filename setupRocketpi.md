@@ -28,6 +28,7 @@ This projekt is developed for a **Raspberry Pi Zero 2W**. You can also use an Ra
 ## Configurations for the GPIO-Programming
 - install the pigpio library `sudo apt install pigpio`
 - setup the pigpio daemon to start at boot `sudo systemctl enable pigpiod`
+- test the configuration with the `pigpioTest.c` program (located under pigpio) 
 
 ## Configurate VS-Code
 - install vs-code on your ubuntu system
