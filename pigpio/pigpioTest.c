@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <pigpiod_if2.h>
-#include <unistd.h>     // to use usleep()
+#include <unistd.h>		// to use usleep()
 
 
-#define LED_PIN 17
-#define T_ON    1000
-#define T_OFF   1000
+#define LED_PIN	17
+#define T_ON	1000
+#define T_OFF	1000
 
 int main(){
     // init gpio client
