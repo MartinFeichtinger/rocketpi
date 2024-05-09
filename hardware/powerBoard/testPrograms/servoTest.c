@@ -4,7 +4,7 @@
 
 #define ENABLE	24
 #define PHASE	18
-#define nFault	23
+#define nFAULT	23
 
 int main(){
     // init gpio client
