@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <pigpiod_if2.h>
-#include <unistd.h>		
 
 
 #define GPS_LED		17
 #define BOOT_LED	27
 #define NET_LED		22
 
-void msleep(int milliseconds);
-void blink(int gpio, float period, int repetition);
+
+void blink(int gpio, double period, int repetition);
 
 int main(){
 	// init gpio client
@@ -28,29 +27,24 @@ int main(){
 	// (The boot LED is controlled by an lm555. During booting, the boot LED flashes and after booting is complete,
 	// the BOOT_LED pin must be set to low so that the LED remains lit)
 	gpio_write(pi, BOOT_LED, 1);
-	msleep(2000);
+	time_sleep(2);
 	gpio_write(pi, BOOT_LED, 0);
 
 	// let the GPS_LED blink for 2 seconds
-	blink(GPS_LED, 1000, 2);
+	blink(GPS_LED, 1, 2);
 
 	// let the NET_LED blink for 2 seconds
-	blink(NET_LED, 1000, 2);
+	blink(NET_LED, 1, 2);
 
 	printf("finished ledTest\n");
 	return 0;
 }
 
-void blink(int gpio, float period, int repetition){
+void blink(int gpio, double period, int repetition){
 	for(int i=0; i<repetition; i++){
 		gpio_write(pi, gpio, 1);
-		msleep(period/2);
+		time_sleep(period/2)
 		gpio_write(pi, gpio, 0);
-		msleep(period/2);		
+		time_sleep(period/2);		
 	}
-}
-
-
-void msleep(int milliseconds){
-	usleep(milliseconds*1000);
 }

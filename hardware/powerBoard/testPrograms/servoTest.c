@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <pigpiod_if2.h>
-#include <unistd.h>
 
 #define ENABLE	24
 #define PHASE	18
