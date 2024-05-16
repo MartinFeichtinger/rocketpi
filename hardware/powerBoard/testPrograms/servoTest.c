@@ -46,7 +46,9 @@ int main(){
     while(1){
 		time_sleep(1);
 	}
-	
+
+	callback_cancel(nfault_cb_id);
+	gpioTerminate();
 	return 0;
 }
 
