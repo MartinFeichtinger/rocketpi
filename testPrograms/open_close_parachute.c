@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <pigpiod_if2.h>
 
 // powerBoard
@@ -61,7 +62,7 @@ int main(){
 	}
 
 	////////////////////////// START OF THE REAL SHIT //////////////////////////
-	gpio_write(pi, BOOT_LED, 1);
+	gpio_write(pi, BOOT_LED, 0);
 
 	while(1){
 		time_sleep(1);
@@ -86,21 +87,21 @@ void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 	static bool parachute_open = true;
 	if(edge == RISING_EDGE){
 		gpio_write(pi, GPS_LED, 1);
-		
+
 		// turn on the motor
 		if(parachute_open){
 			printf("closing the parachute...\n");
 			gpio_write(pi, PHASE, 0);
 		}
 		else{// parachute_closed
-			printf("opening the parachut...");
+			printf("opening the parachut...\n");
 			gpio_write(pi, PHASE, 1);
 		}
 		set_PWM_dutycycle(pi, ENABLE, 10);
 		time_sleep(1);
 		set_PWM_dutycycle(pi, ENABLE, 0);
 
-		parachute_open=false;
+		parachute_open=!parachute_open;
 	}
 	else if(edge == FALLING_EDGE){
 		gpio_write(pi, GPS_LED, 0);
