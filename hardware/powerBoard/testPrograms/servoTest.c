@@ -22,7 +22,7 @@ int main(int argc, char* argv[]){
 	else{
 		return -1;
 	}
-	// init gpio client
+/	// init gpio client
 	const int pi = pigpio_start(NULL, NULL);
 	if(pi < 0){
 		printf("Raspberry Pi not found");
