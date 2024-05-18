@@ -8,7 +8,20 @@
 
 void nfault_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick);		// callback function (is called when the nFault state changes)
 
-int main(){
+int main(int argc, char* argv[]){
+	int dir;
+	if(argc < 2){
+		return -1;
+	}
+	if(*argv[1] == 'o'){
+		dir=1;
+	}
+	else if(*argv[1] == 'c'){
+		dir=0;
+	}
+	else{
+		return -1;
+	}
 	// init gpio client
 	const int pi = pigpio_start(NULL, NULL);
 	if(pi < 0){
@@ -26,8 +39,8 @@ int main(){
 	int real_pwm_frequency = set_PWM_frequency(pi, ENABLE, pwm_frequency);
 	printf("pwm_frequency: set=%d; real=%d\n", pwm_frequency, real_pwm_frequency);
 
-	int pwm_range = 100;
-	int real_pwm_range = set_PWM_range(pi, ENABLE, 100);	// => 1 = 1%
+	int pwm_range = 25;
+	int real_pwm_range = set_PWM_range(pi, ENABLE, pwm_range);	// => 1 = 1%
 	printf("pwm_range: set=%d; real=%d\n", pwm_range, real_pwm_range);
 
 	// init NFAULT callback function
@@ -38,18 +51,19 @@ int main(){
 	}
 
 	// turn on the motor
- 	gpio_write(pi, PHASE, 1);
-	set_PWM_dutycycle(pi, ENABLE, 70);
+ 	gpio_write(pi, PHASE, dir);
+	set_PWM_dutycycle(pi, ENABLE, 10);
 
-	// wait until the torque gets to high 
+	// wait until the torque gets to high
 	// stopping the motor is handled with a special callback function
 	while(1){
-		time_sleep(20);
+		time_sleep(1);
 		break;
 	}
 
+	set_PWM_dutycycle(pi, ENABLE, 0);
 	callback_cancel(nfault_cb_id);
-	gpioTerminate();
+	//gpioTerminate();
 	return 0;
 }
 
