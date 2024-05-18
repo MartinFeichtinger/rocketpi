@@ -7,14 +7,14 @@
 #define NET_LED		22
 
 
-void blink(int gpio, double period, int repetition);
+void blink(int pi, int gpio, double period, int repetition);
 
 int main(){
 	// init gpio client
 	const int pi = pigpio_start(NULL, NULL);
 	if(pi < 0){
 		printf("Raspberry Pi not found");
-		return;
+		return -1;
 	}
 
 	// init gpios
@@ -27,24 +27,24 @@ int main(){
 	// (The boot LED is controlled by an lm555. During booting, the boot LED flashes and after booting is complete,
 	// the BOOT_LED pin must be set to low so that the LED remains lit)
 	gpio_write(pi, BOOT_LED, 1);
-	time_sleep(2);
+	time_sleep(3);
 	gpio_write(pi, BOOT_LED, 0);
 
 	// let the GPS_LED blink for 2 seconds
-	blink(GPS_LED, 1, 2);
+	blink(pi, GPS_LED, 1, 3);
 
 	// let the NET_LED blink for 2 seconds
-	blink(NET_LED, 1, 2);
+	blink(pi, NET_LED, 1, 3);
 
 	printf("finished ledTest\n");
 	return 0;
 }
 
-void blink(int gpio, double period, int repetition){
+void blink(int pi, int gpio, double period, int repetition){
 	for(int i=0; i<repetition; i++){
 		gpio_write(pi, gpio, 1);
-		time_sleep(period/2)
+		time_sleep(period/2);
 		gpio_write(pi, gpio, 0);
-		time_sleep(period/2);		
+		time_sleep(period/2);
 	}
 }
