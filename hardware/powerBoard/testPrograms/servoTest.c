@@ -44,7 +44,8 @@ int main(){
 	// wait until the torque gets to high 
 	// stopping the motor is handled with a special callback function
 	while(1){
-		time_sleep(1);
+		time_sleep(20);
+		break;
 	}
 
 	callback_cancel(nfault_cb_id);
