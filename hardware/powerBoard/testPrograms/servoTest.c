@@ -6,24 +6,24 @@
 #define NFAULT	23
 
 
-void nfault_cb(int pi, unsigned user_gpio, unsigned edge, unint32_t tick);		// callback function (is called when the nFault state changes)
+void nfault_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick);		// callback function (is called when the nFault state changes)
 
 int main(){
-    // init gpio client
-    const int pi = pigpio_start(NULL, NULL);
-    if(pi < 0){
-        printf("Raspberry Pi not found");
-        return;
-    }
+	// init gpio client
+	const int pi = pigpio_start(NULL, NULL);
+	if(pi < 0){
+		printf("Raspberry Pi not found");
+		return 0;
+	}
 
-    // init gpios
-    set_mode(pi, ENABLE, PI_OUTPUT);
-    set_mode(pi, PHASE, PI_OUTPUT);
-    set_mode(pi, NFAULT, PI_INPUT);
+	// init gpios
+	set_mode(pi, ENABLE, PI_OUTPUT);
+	set_mode(pi, PHASE, PI_OUTPUT);
+	set_mode(pi, NFAULT, PI_INPUT);
 
 	// cofigurate the pwm
 	int pwm_frequency = 8000;
-	int real_pwm_frequency = set_PWM_frequency(pi, ENABLE, pwm_frequency)
+	int real_pwm_frequency = set_PWM_frequency(pi, ENABLE, pwm_frequency);
 	printf("pwm_frequency: set=%d; real=%d\n", pwm_frequency, real_pwm_frequency);
 
 	int pwm_range = 100;
@@ -32,18 +32,18 @@ int main(){
 
 	// init NFAULT callback function
 	const int nfault_cb_id = callback(pi, NFAULT, EITHER_EDGE, nfault_cb);
-    if(nfault_cb_id < 0){
-        printf("init callback failed");
-        return;
-    }
+	if(nfault_cb_id < 0){
+		printf("init callback failed");
+		return 0;
+	}
 
-    // turn on the motor
-    gpio_write(pi, PHASE, 1);
-    set_PWM_dutycycle(pi, ENABLE, 70);
+	// turn on the motor
+ 	gpio_write(pi, PHASE, 1);
+	set_PWM_dutycycle(pi, ENABLE, 70);
 
-    // wait until the torque gets to high 
+	// wait until the torque gets to high 
 	// stopping the motor is handled with a special callback function
-    while(1){
+	while(1){
 		time_sleep(1);
 	}
 
@@ -52,7 +52,7 @@ int main(){
 	return 0;
 }
 
-void nfault_cb(int pi, unsigned user_gpio, unsigned edge, unint32_t tick){
+void nfault_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 	if(edge == FALLING_EDGE){
 		printf("nFault turned LOW\n");
 		//set_PWM_dutycycle(pi, ENABLE, 0);		// stop the motor
