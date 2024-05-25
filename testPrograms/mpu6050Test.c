@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <pigpiod_if2.h>
 #include <signal.h>
 
@@ -15,17 +16,17 @@ bool init();
 void readMPU6050();
 void sigintlHandler(int signal);
 
-void main(){
+int main(){
 	signal(SIGINT, sigintlHandler); // this handler is called when ctrl+c is pressed
 	
 	if(init() == false){
 		return -1;
 	}
 
-	wihle(true){
-		readMPU6050(pi, handle);
-		printf("accX: %d; accY: %d; accZ: %d; gyrX: %d; gyrY: %d; gyrZ: %d; temp: %f\n", accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
-		sleep(1);
+	while(true){
+		readMPU6050(pi, i2c_handle);
+		printf("accX: %d;\taccY: %d;\taccZ: %d;\tgyrX: %d;\tgyrY: %d;\tgyrZ: %d;\ttemp: %f\n", accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+		time_sleep(0.5);
 	}
 }
 
@@ -34,14 +35,14 @@ bool init(){
 	// init pigpio
 	pi = pigpio_start(NULL, NULL);
 	if(pi < 0){
-		printf("Raspberry Pi not found");
+		printf("Raspberry Pi not found\n");
 		return false;
 	}
 	
 	// init i2c
 	i2c_handle = i2c_open(pi, 1, MPU6050_ADRESS, 0);
 	if(i2c_handle < 0){
-		printf("i2c device not found");
+		printf("i2c device not found\n");
 		return false;
 	}
 	
@@ -74,7 +75,7 @@ void readMPU6050(){
 }
 
 void sigintlHandler(int signal){
-	printf("signal: %d", signal);
+	printf("signal: %d; i2c_handler stopped\n", signal);
 	i2c_close(pi, i2c_handle);
 	exit(0);
 }
