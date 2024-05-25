@@ -34,3 +34,9 @@ This projekt is developed for a **Raspberry Pi Zero 2W**. You can also use an Ra
 - install vs-code on your ubuntu system
 - install the **C/C++** extention
 - install the **Remote Development** extention
+
+## Programm Boot-LED
+- `sudo nano /etc/rc.local`
+- insert this two lines befor the `exit(0)`
+- `/usr/bin/pigs m 27 w`
+- `/usr/bin/pigs w 27 0`
