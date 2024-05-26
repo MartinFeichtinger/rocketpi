@@ -9,8 +9,8 @@
 #define PHASE			18
 
 // controlPanel
-#define ARM_LED			17		// GPS_LED on the schematic
-#define LOADED_LED		22		// NET_LED on the schematic
+#define ARM_LED			22		// NET_LED on the schematic
+#define LOADED_LED		17		// GPS_LED on the schematic
 #define BUTTON			10
 
 // MPU6050
@@ -31,7 +31,7 @@ double temp = 0.0;
 
 // function prototypes
 bool init();
-int16_t *readMPU6050();
+void readMPU6050();
 void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick);
 
 
@@ -67,20 +67,23 @@ int main(){
 
 			case LOADED:
 				if(button_pressed){
-					uint32_t duration = (get_current_tick() - last_rising_tick)/1000; 	// milliseconds
-					if(duration >= 3000){
+					uint32_t duration = (get_current_tick(pi) - last_rising_tick)/1000; 	// milliseconds
+					if(duration >= 2000){
 						button_pressed = false;
+
+						gpio_write(pi, ARM_LED, 1);
 						state = ARMED;
 					}
 				}
 				break;
 
 			case ARMED:
-				gpio_write(pi, ARM_LED, 1);
 				if(button_pressed){
-					uint32_t duration = (get_current_tick() - last_rising_tick)/1000; 	// milliseconds
-					if(duration >= 3000){
+					uint32_t duration = (get_current_tick(pi) - last_rising_tick)/1000; 	// milliseconds
+					if(duration >= 2000){
 						button_pressed = false;
+
+						gpio_write(pi, ARM_LED, 0);
 						state = UNARMED;
 					}
 				}
@@ -124,6 +127,9 @@ bool init(){
 	set_mode(pi, ARM_LED, PI_OUTPUT);
 	set_mode(pi, LOADED_LED, PI_OUTPUT);
 	set_mode(pi, BUTTON, PI_INPUT);
+
+	gpio_write(pi, ARM_LED, 0);
+	gpio_write(pi, LOADED_LED, 0);
 
 	// init button spefic gpio settings
 	set_glitch_filter(pi, BUTTON, 20000);	// ingor all input changes for 20ms after the input state changes
@@ -173,19 +179,17 @@ void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 		if(state == OPEN){
 			state = SHAKING;
 		}
-		else if(state == LOADED){
+		else if(state == LOADED || state == ARMED){
 			last_rising_tick = tick;
 			button_pressed = true;
 		}
-		else if(state = UNARMED){
+		else if(state == UNARMED){
 			state = OPENING;
 		}
 	}
 	else if(edge == FALLING_EDGE){
-		if(state = SHAKING){
+		if(state == SHAKING){
 			state = CLOSING;
 		}
 	}
-
-
 }
