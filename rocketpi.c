@@ -9,7 +9,7 @@
 #define PHASE			18
 
 // controlPanel
-#define ARM_LED			22		// NET_LED on the schematic
+#define ARMED_LED			22		// NET_LED on the schematic
 #define LOADED_LED		17		// GPS_LED on the schematic
 #define BUTTON			10
 
@@ -71,7 +71,7 @@ int main(){
 					if(duration >= 2000){
 						button_pressed = false;
 
-						gpio_write(pi, ARM_LED, 1);
+						gpio_write(pi, ARMED_LED, 1);
 						state = ARMED;
 					}
 				}
@@ -83,7 +83,7 @@ int main(){
 					if(duration >= 2000){
 						button_pressed = false;
 
-						gpio_write(pi, ARM_LED, 0);
+						gpio_write(pi, ARMED_LED, 0);
 						state = UNARMED;
 					}
 				}
@@ -124,11 +124,11 @@ bool init(){
 	set_mode(pi, ENABLE, PI_OUTPUT);
 	set_mode(pi, PHASE, PI_OUTPUT);
 
-	set_mode(pi, ARM_LED, PI_OUTPUT);
+	set_mode(pi, ARMED_LED, PI_OUTPUT);
 	set_mode(pi, LOADED_LED, PI_OUTPUT);
 	set_mode(pi, BUTTON, PI_INPUT);
 
-	gpio_write(pi, ARM_LED, 0);
+	gpio_write(pi, ARMED_LED, 0);
 	gpio_write(pi, LOADED_LED, 0);
 
 	// init button spefic gpio settings
