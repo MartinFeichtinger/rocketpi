@@ -33,3 +33,8 @@ Example Programms: https://github.com/ozzmaker/BerryIMU
 ### Controll Panel
 
 ### Power Board
+
+## Software
+### State-Machine
+![stateMachine](https://github.com/MartinFeichtinger/rocketpi/assets/110301453/8d6aa8fb-2883-4f97-b338-c49b9545b5ed)
+
