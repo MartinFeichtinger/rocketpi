@@ -9,7 +9,7 @@
 #define PHASE			18
 
 // controlPanel
-#define ARMED_LED			22		// NET_LED on the schematic
+#define ARMED_LED		22		// NET_LED on the schematic
 #define LOADED_LED		17		// GPS_LED on the schematic
 #define BUTTON			10
 
@@ -130,6 +130,15 @@ bool init(){
 
 	gpio_write(pi, ARMED_LED, 0);
 	gpio_write(pi, LOADED_LED, 0);
+
+	// cofigurate the pwm
+	int pwm_frequency = 8000;
+	int real_pwm_frequency = set_PWM_frequency(pi, ENABLE, pwm_frequency);
+	printf("pwm_frequency: set=%d; real=%d\n", pwm_frequency, real_pwm_frequency);
+
+	int pwm_range = 25;
+	int real_pwm_range = set_PWM_range(pi, ENABLE, pwm_range);
+	printf("pwm_range: set=%d; real=%d\n", pwm_range, real_pwm_range);
 
 	// init button spefic gpio settings
 	set_glitch_filter(pi, BUTTON, 20000);	// ingor all input changes for 20ms after the input state changes
