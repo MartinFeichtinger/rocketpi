@@ -31,11 +31,14 @@ double temp = 0.0;
 
 // function prototypes
 bool init();
+void sigintlHandler(int signal);
 void readMPU6050();
 void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick);
 
 
 int main(){
+	signal(SIGINT, sigintlHandler); // this handler is called when ctrl+c is pressed
+
 	if(init() == false){
 		return -1;
 	}
@@ -185,6 +188,8 @@ void readMPU6050(){
 
 void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 	if(edge == RISING_EDGE){
+		printf("button pressed\n");
+
 		if(state == OPEN){
 			state = SHAKING;
 		}
@@ -197,8 +202,16 @@ void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 		}
 	}
 	else if(edge == FALLING_EDGE){
+		printf("button released\n");
+
 		if(state == SHAKING){
 			state = CLOSING;
 		}
 	}
+}
+
+void sigintlHandler(int signal){
+	printf("signal: %d; i2c_handler stopped\n", signal);
+	i2c_close(pi, i2c_handle);
+	exit(0);
 }
