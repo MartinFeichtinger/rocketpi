@@ -5,11 +5,13 @@
 #include <signal.h>
 
 #define MPU6050_ADRESS	0x68
+#define OUTPUT_FILE		"mpu6050.txt"
 
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
 int pi;
 int i2c_handle;
+int file_handle;
 
 // funciton prototypes
 bool init();
@@ -53,6 +55,20 @@ bool init(){
 	//i2c_write_byte_data(pi, i2c_handle, 0x19, 0x07);	// set sample rate to 1kHz
 	i2c_write_byte_data(pi, i2c_handle, 0x1A, 0x00);	// set digital low pass filter to 260Hz
 	i2c_write_byte_data(pi, i2c_handle, 0x6C, 0x00);	// disable sleep mode
+
+	// open storage file
+	file_handle = file_open(pi, OUTPUT_FILE, PI_FILE_WRITE);
+
+	char init_headline[] = {"This is a test to write to the output file.\n"};
+	
+	if(file_write(pi, file_handle, init_headline, sizeof(init_headline))){
+		printf("Stored to file sucessfully\n")
+	}
+	else{
+		printf("Unable to save to file\n");
+		return -1;
+	}
+
 	
 	return true;
 }
@@ -77,5 +93,6 @@ void readMPU6050(){
 void sigintlHandler(int signal){
 	printf("signal: %d; i2c_handler stopped\n", signal);
 	i2c_close(pi, i2c_handle);
+	file_close(pi, file_handle);
 	exit(0);
 }
