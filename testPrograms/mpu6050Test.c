@@ -95,7 +95,9 @@ void readMPU6050(){
 }
 
 void sigintlHandler(int signal){
-	printf("signal: %d; i2c_handler stopped\n", signal);
+	printf("\n\nProgramm interupted (ctrl+c)\n");
+	printf("i2c_handler stopped\n");
+	printf("file closed\n");
 	i2c_close(pi, i2c_handle);
 	file_close(pi, file_handle);
 	exit(0);
