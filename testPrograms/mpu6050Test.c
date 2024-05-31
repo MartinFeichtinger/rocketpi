@@ -5,7 +5,7 @@
 #include <signal.h>
 
 #define MPU6050_ADRESS	0x68
-#define OUTPUT_FILE		"mpu6050.txt"
+#define OUTPUT_FILE		"/home/pi/rocketpi/testPrograms/testFiles/mpu6050.txt"
 
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
@@ -20,7 +20,7 @@ void sigintlHandler(int signal);
 
 int main(){
 	signal(SIGINT, sigintlHandler); // this handler is called when ctrl+c is pressed
-	
+
 	if(init() == false){
 		return -1;
 	}
@@ -40,14 +40,14 @@ bool init(){
 		printf("Raspberry Pi not found\n");
 		return false;
 	}
-	
+
 	// init i2c
 	i2c_handle = i2c_open(pi, 1, MPU6050_ADRESS, 0);
 	if(i2c_handle < 0){
 		printf("i2c device not found\n");
 		return false;
 	}
-	
+
 	// init mpu6050
 	i2c_write_byte_data(pi, i2c_handle, 0x6B, 0x00);	// wake up mpu6050
 	i2c_write_byte_data(pi, i2c_handle, 0x1B, 0x08);	// set full scale range of gyroscope to +-500°/s
@@ -58,18 +58,22 @@ bool init(){
 
 	// open storage file
 	file_handle = file_open(pi, OUTPUT_FILE, PI_FILE_WRITE);
+	if(file_handle >= 0){
+		printf("File opend succefully\n");
+		char init_headline[] = {"Some random test headline, bla bla bla ...\n\n"};
 
-	char init_headline[] = {"This is a test to write to the output file.\n"};
-	
-	if(file_write(pi, file_handle, init_headline, sizeof(init_headline))){
-		printf("Stored to file sucessfully\n")
+		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)) == 0){
+			printf("Stored to file sucessfully\n");
+		}
+		else{
+			printf("Unable to save to file\n");
+			return -1;
+		}
 	}
 	else{
-		printf("Unable to save to file\n");
-		return -1;
+		printf("Can not open file. Error %d\n", file_handle);
 	}
 
-	
 	return true;
 }
 
@@ -79,12 +83,12 @@ void readMPU6050(){
 	accX = i2c_read_byte_data(pi, i2c_handle, 0x3B) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x3C);
 	accY = i2c_read_byte_data(pi, i2c_handle, 0x3D) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x3E);
 	accZ = i2c_read_byte_data(pi, i2c_handle, 0x3F) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x40);
-	
+
 	// read gyroscope values
 	gyrX = i2c_read_byte_data(pi, i2c_handle, 0x43) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x44);
 	gyrY = i2c_read_byte_data(pi, i2c_handle, 0x45) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x46);
 	gyrZ = i2c_read_byte_data(pi, i2c_handle, 0x47) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x48);
-	
+
 	// read temperature value
 	tVal = i2c_read_byte_data(pi, i2c_handle, 0x41) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x42);
 	temp = (double)tVal / 340.0 + 36.53;
