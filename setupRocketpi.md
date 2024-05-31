@@ -40,3 +40,8 @@ This projekt is developed for a **Raspberry Pi Zero 2W**. You can also use an Ra
 - insert this two lines befor the `exit(0)`
 - `/usr/bin/pigs m 27 w`
 - `/usr/bin/pigs w 27 0`
+
+## Configurate files to be used by pigpio
+- generate folder for the files
+- add the folder to the pigpio access file (`sudo nano /opt/pigpio/access` and add `/dir/* u`)
+- use the whole file path to open the file in your program
