@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pigpiod_if2.h>
 #include <signal.h>
 
 #define MPU6050_ADRESS	0x68
-#define OUTPUT_FILE	"/home/pi/rocketpi/testPrograms/testFiles/mpu6050.txt"
+#define OUTPUT_FOLDER	"/home/pi/rocketpi/testPrograms/testFiles/"
 
 uint32_t timestamp;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
@@ -74,13 +75,40 @@ bool init(){
 	i2c_write_byte_data(pi, i2c_handle, 0x6C, 0x00);	// disable sleep mode
 
 	// open storage file
-	file_handle = file_open(pi, OUTPUT_FILE, PI_FILE_WRITE);
+	char searchString[] = OUTPUT_FOLDER "mpu6050-*.txt";
+	char files[1000];
+	int c = file_list(pi, searchString, files, sizeof(files));
+
+	char filename[20];
+	if(c >= 0){
+		files[c]=0;
+
+		int numberOfFiles=0;
+		for(int i=0; i<c; i++){
+			if(files[i] == '\n'){
+				numberOfFiles++;
+			}
+		}
+		sprintf(filename, "mpu6050-%.2d.txt", numberOfFiles);
+	}
+	else{
+		strcpy(filename, "mpu6050-00.txt");
+	}
+
+	char outputFile[] = OUTPUT_FOLDER;
+	strcat(outputFile, filename);
+	printf("output file: %s\n", outputFile);
+
+	char command[100];
+	sprintf(command, "touch %s", outputFile);
+	system(command);
+
+	file_handle = file_open(pi, outputFile, PI_FILE_WRITE);
 	if(file_handle >= 0){
-		printf("File opend succefully\n");
+		printf("File opend succesfully\n\n");
 		char init_headline[] = {"time	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
 
 		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)-1) == 0){
-			printf("Stored to file sucessfully\n\n");
 			printf(init_headline);
 		}
 		else{
@@ -89,7 +117,8 @@ bool init(){
 		}
 	}
 	else{
-		printf("Can not open file. Error %d\n", file_handle);
+		printf(pigpio_error(file_handle));
+		return false;
 	}
 
 	return true;
