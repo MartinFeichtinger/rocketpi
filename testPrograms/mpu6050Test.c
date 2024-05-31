@@ -5,8 +5,9 @@
 #include <signal.h>
 
 #define MPU6050_ADRESS	0x68
-#define OUTPUT_FILE		"/home/pi/rocketpi/testPrograms/testFiles/mpu6050.txt"
+#define OUTPUT_FILE	"/home/pi/rocketpi/testPrograms/testFiles/mpu6050.txt"
 
+uint32_t timestamp;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
 int pi;
@@ -26,8 +27,24 @@ int main(){
 	}
 
 	while(true){
+		char str[300];
 		readMPU6050(pi, i2c_handle);
-		printf("accX: %d;\taccY: %d;\taccZ: %d;\tgyrX: %d;\tgyrY: %d;\tgyrZ: %d;\ttemp: %f\n", accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+		printf(str);
+
+		int i=0;
+		while(str[i] != '\0'){
+			i++;
+		}
+
+                if(file_write(pi, file_handle, str, i) == 0){
+                        //printf("Stored to file sucessfully\n");
+                }
+                else{
+                        printf("Unable to save to file\n");
+                        return -1;
+                }
+
 		time_sleep(0.5);
 	}
 }
@@ -60,14 +77,15 @@ bool init(){
 	file_handle = file_open(pi, OUTPUT_FILE, PI_FILE_WRITE);
 	if(file_handle >= 0){
 		printf("File opend succefully\n");
-		char init_headline[] = {"Some random test headline, bla bla bla ...\n\n"};
+		char init_headline[] = {"time	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
 
-		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)) == 0){
-			printf("Stored to file sucessfully\n");
+		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)-1) == 0){
+			printf("Stored to file sucessfully\n\n");
+			printf(init_headline);
 		}
 		else{
 			printf("Unable to save to file\n");
-			return -1;
+			return false;
 		}
 	}
 	else{
@@ -78,6 +96,8 @@ bool init(){
 }
 
 void readMPU6050(){
+
+	timestamp = get_current_tick(pi)/1000;
 	// read accelerometer values
 	i2c_write_byte_data(pi, i2c_handle, 0x3B, 0x00);
 	accX = i2c_read_byte_data(pi, i2c_handle, 0x3B) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x3C);
