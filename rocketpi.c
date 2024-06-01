@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pigpiod_if2.h>
+#include <signal.h>
 
+// file paths
+#define OUTPUT_FOLDER	"/home/pi/rocketpi/measurements/"
 
 // powerBoard
 #define ENABLE			24
@@ -20,7 +24,7 @@
 int pi;
 int i2c_handle;
 
-enum State {OPEN, SHAKING, CLOSING, LOADED, ARMED, UNARMED, FLYING, OPENING};
+enum State {OPEN, SHAKING, CLOSING, LOADED, ARMED, UNARMED, OPENING, FLYING, FLYING_OPEN};
 enum State state = OPEN;
 
 uint32_t last_rising_tick;
@@ -29,8 +33,12 @@ bool button_pressed;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
 
+// thread functions prototypes
+void *saveMesurements();
+
 // function prototypes
 bool init();
+void generateNewFile();
 void sigintlHandler(int signal);
 void readMPU6050();
 void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick);
@@ -75,6 +83,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 1);
+						start_thread(saveMesurements, NULL);
 						state = ARMED;
 					}
 				}
@@ -87,19 +96,21 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 0);
+						stop_thread(saveMesurements);
+						file_close(pi, file_handle);
+						generateNewFile();
 						state = UNARMED;
 					}
 				}
-				// if acc >= bla bla then state=FLYING;
-				// already store data to file
+
+				// if accelerations is detected
+				if(accX >= 0){
+					state = FLYING;
+				}
 				break;
 
 			case UNARMED:
-				// wait for button press
-				break;
-
-			case FLYING:
-				// Code for FLYING state
+				// wait for button press to switch to OPENING
 				break;
 
 			case OPENING:
@@ -111,8 +122,57 @@ int main(){
 				gpio_write(pi, LOADED_LED, 0);
 				state = OPEN;
 				break;
+
+			case FLYING:
+				time_sleep(4);
+				state = FLYING_OPEN;
+				break;
+
+			case FLYING_OPEN:
+				// opening parachute
+				gpio_write(pi, PHASE, 1);
+				set_PWM_dutycycle(pi, ENABLE, 10);
+				time_sleep(1);
+				set_PWM_dutycycle(pi, ENABLE, 0);
+				gpio_write(pi, LOADED_LED, 0);
+
+				time_sleep(15);
+				stop_thread(saveMesurements);
+				file_close(pi, file_handle);
+				generateNewFile();
+				state = OPEN;
+				break;
 		}
 	}
+
+	time_sleep(0.05);
+}
+
+void *saveMesurements(){
+	while(true){
+		if(state == ARMED || state == FLYING || state == FLYING_OPEN){
+			char str[300];
+			readMPU6050(pi, i2c_handle);
+			sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+			printf(str);
+
+			int i=0;
+			while(str[i] != '\0'){
+				i++;
+			}
+
+			if(file_write(pi, file_handle, str, i) == 0){
+				//printf("Stored to file sucessfully\n");
+			}
+			else{
+				printf("Unable to save to file\n");
+				return -1;
+			}
+		}
+
+		time_sleep(0.05);
+	}
+
 }
 
 bool init(){
@@ -166,7 +226,57 @@ bool init(){
 	i2c_write_byte_data(pi, i2c_handle, 0x1A, 0x00);	// set digital low pass filter to 260Hz
 	i2c_write_byte_data(pi, i2c_handle, 0x6C, 0x00);	// disable sleep mode
 	
+	generateNewFile();
+
 	return true;
+}
+
+void generateNewFile(){
+	char searchString[] = OUTPUT_FOLDER "mpu6050-*.txt";
+	char files[1000];
+	int c = file_list(pi, searchString, files, sizeof(files));
+
+	char filename[20];
+	if(c >= 0){
+		files[c]=0;
+
+		int numberOfFiles=0;
+		for(int i=0; i<c; i++){
+			if(files[i] == '\n'){
+				numberOfFiles++;
+			}
+		}
+		sprintf(filename, "mpu6050-%.2d.txt", numberOfFiles);
+	}
+	else{
+		strcpy(filename, "mpu6050-00.txt");
+	}
+
+	char outputFile[] = OUTPUT_FOLDER;
+	strcat(outputFile, filename);
+	printf("output file: %s\n", outputFile);
+
+	char command[100];
+	sprintf(command, "touch %s", outputFile);
+	system(command);
+
+	file_handle = file_open(pi, outputFile, PI_FILE_WRITE);
+	if(file_handle >= 0){
+		printf("File opend succesfully\n\n");
+		char init_headline[] = {"time	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
+
+		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)-1) == 0){
+			printf(init_headline);
+		}
+		else{
+			printf("Unable to save to file\n");
+			return false;
+		}
+	}
+	else{
+		printf(pigpio_error(file_handle));
+		return false;
+	}	
 }
 
 void readMPU6050(){
@@ -211,7 +321,10 @@ void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 }
 
 void sigintlHandler(int signal){
-	printf("signal: %d; i2c_handler stopped\n", signal);
+	printf("\n\nProgramm interupted (ctrl+c)\n");
+	printf("i2c_handler stopped\n");
+	printf("file closed\n");
 	i2c_close(pi, i2c_handle);
+	file_close(pi, file_handle);
 	exit(0);
 }
