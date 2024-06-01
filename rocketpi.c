@@ -153,6 +153,7 @@ int main(){
 		}
 		
 		if(saveMeasurements){
+		timestamp=get_current_tick(pi)/1000;
 		char str[300];
 		readMPU6050(pi, i2c_handle);
 		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
