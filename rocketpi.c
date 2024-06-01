@@ -85,6 +85,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 1);
+						generateNewFile();
 						saveMeasurements=true;
 						state = ARMED;
 					}
@@ -100,7 +101,6 @@ int main(){
 						gpio_write(pi, ARMED_LED, 0);
 						saveMeasurements=false;
 						file_close(pi, file_handle);
-						generateNewFile();
 						state = UNARMED;
 					}
 				}
@@ -146,7 +146,6 @@ int main(){
 					gpio_write(pi, ARMED_LED, 0);
 					saveMeasurements=false;
 					file_close(pi, file_handle);
-					generateNewFile();
 					state = OPEN;
 				}
 				break;
@@ -227,8 +226,6 @@ bool init(){
 	//i2c_write_byte_data(pi, i2c_handle, 0x19, 0x07);	// set sample rate to 1kHz
 	i2c_write_byte_data(pi, i2c_handle, 0x1A, 0x00);	// set digital low pass filter to 260Hz
 	i2c_write_byte_data(pi, i2c_handle, 0x6C, 0x00);	// disable sleep mode
-	
-	generateNewFile();
 
 	return true;
 }
