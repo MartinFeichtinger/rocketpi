@@ -101,6 +101,7 @@ int main(){
 						gpio_write(pi, ARMED_LED, 0);
 						saveMeasurements=false;
 						file_close(pi, file_handle);
+						printf("rocketpi unarmed\n\n")
 						state = UNARMED;
 					}
 				}
@@ -146,6 +147,7 @@ int main(){
 					gpio_write(pi, ARMED_LED, 0);
 					saveMeasurements=false;
 					file_close(pi, file_handle);
+					printf("Parachute opened\n\n")
 					state = OPEN;
 				}
 				break;
