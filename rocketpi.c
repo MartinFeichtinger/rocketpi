@@ -24,7 +24,7 @@
 int pi;
 int i2c_handle;
 int file_handle;
-int thread_pointer;
+pthread_t *threadID;
 
 enum State {OPEN, SHAKING, CLOSING, LOADED, ARMED, UNARMED, OPENING, FLYING, FLYING_OPEN};
 enum State state = OPEN;
@@ -37,11 +37,11 @@ int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
 
 // thread functions prototypes
-void *saveMesurements();
+void *saveMeasurements();
 
 // function prototypes
 bool init();
-void generateNewFile();
+bool generateNewFile();
 void sigintlHandler(int signal);
 void readMPU6050();
 void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick);
@@ -86,7 +86,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 1);
-						thread_pointer = (saveMesurements, NULL);
+						threadID = (saveMeasurements, NULL);
 						state = ARMED;
 					}
 				}
@@ -99,7 +99,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 0);
-						stop_thread(thread_pointer);
+						stop_thread(threadID);
 						file_close(pi, file_handle);
 						generateNewFile();
 						state = UNARMED;
@@ -140,7 +140,7 @@ int main(){
 				gpio_write(pi, LOADED_LED, 0);
 
 				time_sleep(15);
-				stop_thread(thread_pointer);
+				stop_thread(threadID);
 				file_close(pi, file_handle);
 				generateNewFile();
 				state = OPEN;
@@ -151,7 +151,7 @@ int main(){
 	time_sleep(0.05);
 }
 
-void *saveMesurements(){
+void *saveMeasurements(){
 	while(true){
 		if(state == ARMED || state == FLYING || state == FLYING_OPEN){
 			char str[300];
@@ -169,7 +169,6 @@ void *saveMesurements(){
 			}
 			else{
 				printf("Unable to save to file\n");
-				return -1;
 			}
 		}
 
@@ -234,7 +233,7 @@ bool init(){
 	return true;
 }
 
-void generateNewFile(){
+bool generateNewFile(){
 	char searchString[] = OUTPUT_FOLDER "mpu6050-*.txt";
 	char files[1000];
 	int c = file_list(pi, searchString, files, sizeof(files));
@@ -279,7 +278,9 @@ void generateNewFile(){
 	else{
 		printf(pigpio_error(file_handle));
 		return false;
-	}	
+	}
+
+	return true;
 }
 
 void readMPU6050(){
