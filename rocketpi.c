@@ -151,9 +151,8 @@ int main(){
 				}
 				break;
 		}
-	}
-
-	if(saveMeasurements){
+		
+		if(saveMeasurements){
 		char str[300];
 		readMPU6050(pi, i2c_handle);
 		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
@@ -173,6 +172,7 @@ int main(){
 	}
 
 	time_sleep(0.05);
+	}
 }
 
 
