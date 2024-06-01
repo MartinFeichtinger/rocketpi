@@ -35,6 +35,7 @@ uint32_t timer_start;
 
 bool saveMeasurements = false;
 uint32_t timestamp;
+int flyingState=0;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
 
@@ -101,7 +102,7 @@ int main(){
 						gpio_write(pi, ARMED_LED, 0);
 						saveMeasurements=false;
 						file_close(pi, file_handle);
-						printf("rocketpi unarmed\n\n")
+						printf("rocketpi unarmed\n\n");
 						state = UNARMED;
 					}
 				}
@@ -109,6 +110,7 @@ int main(){
 				// if accelerations is detected
 				if(accX >= 1000){
 					timer_start = get_current_tick(pi);
+					flyingState=1;
 					state = FLYING;
 				}
 				break;
@@ -130,34 +132,39 @@ int main(){
 			case FLYING:
 				if(get_current_tick(pi) >= timer_start + 4000*1000){
 					timer_start = get_current_tick(pi);
+					flyingState=2;
 					state = FLYING_OPEN;
 				}
 				break;
 
 			case FLYING_OPEN:
-				// opening parachute
-				gpio_write(pi, PHASE, 1);
-				set_PWM_dutycycle(pi, ENABLE, 10);
-				if(get_current_tick(pi) >= timer_start + 1000*1000){
-					set_PWM_dutycycle(pi, ENABLE, 0);
-					gpio_write(pi, LOADED_LED, 0);
+				if(get_current_tick(pi) < timer_start + 1000*1000){
+	                                // opening parachute
+	                                gpio_write(pi, PHASE, 1);
+	                                set_PWM_dutycycle(pi, ENABLE, 10);
+				}
+				else{
+                                        set_PWM_dutycycle(pi, ENABLE, 0);
+                                        gpio_write(pi, LOADED_LED, 0);
+                                        flyingState=3;
 				}
 
 				if(get_current_tick(pi) >= timer_start + 10000*1000){
 					gpio_write(pi, ARMED_LED, 0);
 					saveMeasurements=false;
+					flyingState=0;
 					file_close(pi, file_handle);
-					printf("Parachute opened\n\n")
+					printf("Parachute opened\n\n");
 					state = OPEN;
 				}
 				break;
 		}
-		
+
 		if(saveMeasurements){
 		timestamp=get_current_tick(pi)/1000;
 		char str[300];
 		readMPU6050(pi, i2c_handle);
-		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, flyingState, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
 		printf(str);
 
 		int i=0;
@@ -264,7 +271,7 @@ bool generateNewFile(){
 	file_handle = file_open(pi, outputFile, PI_FILE_WRITE);
 	if(file_handle >= 0){
 		printf("File opend succesfully\n\n");
-		char init_headline[] = {"time	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
+		char init_headline[] = {"time	state	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
 
 		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)-1) == 0){
 			printf(init_headline);
