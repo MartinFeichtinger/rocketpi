@@ -24,7 +24,6 @@
 int pi;
 int i2c_handle;
 int file_handle;
-pthread_t *threadID;
 
 enum State {OPEN, SHAKING, CLOSING, LOADED, ARMED, UNARMED, OPENING, FLYING, FLYING_OPEN};
 enum State state = OPEN;
@@ -32,12 +31,12 @@ enum State state = OPEN;
 uint32_t last_rising_tick;
 bool button_pressed;
 
+uint32_t timer_start;
+
+bool saveMeasurements = false;
 uint32_t timestamp;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
-
-// thread functions prototypes
-void *saveMeasurements();
 
 // function prototypes
 bool init();
@@ -86,7 +85,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 1);
-						threadID = (saveMeasurements, NULL);
+						saveMeasurements=true;
 						state = ARMED;
 					}
 				}
@@ -99,7 +98,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 0);
-						stop_thread(threadID);
+						saveMeasurements=false;
 						file_close(pi, file_handle);
 						generateNewFile();
 						state = UNARMED;
@@ -107,7 +106,8 @@ int main(){
 				}
 
 				// if accelerations is detected
-				if(accX >= 0){
+				if(accX >= 1000){
+					timer_start = get_current_tick(pi);
 					state = FLYING;
 				}
 				break;
@@ -127,55 +127,54 @@ int main(){
 				break;
 
 			case FLYING:
-				time_sleep(4);
-				state = FLYING_OPEN;
+				if(get_current_tick(pi) >= timer_start + 4000*1000){
+					timer_start = get_current_tick(pi);
+					state = FLYING_OPEN;
+				}
 				break;
 
 			case FLYING_OPEN:
 				// opening parachute
 				gpio_write(pi, PHASE, 1);
 				set_PWM_dutycycle(pi, ENABLE, 10);
-				time_sleep(1);
-				set_PWM_dutycycle(pi, ENABLE, 0);
-				gpio_write(pi, LOADED_LED, 0);
+				if(get_current_tick(pi) >= timer_start + 1000*1000){
+					set_PWM_dutycycle(pi, ENABLE, 0);
+					gpio_write(pi, LOADED_LED, 0);
+				}
 
-				time_sleep(15);
-				stop_thread(threadID);
-				file_close(pi, file_handle);
-				generateNewFile();
-				state = OPEN;
+				if(get_current_tick(pi) >= timer_start + 10000*1000){
+					gpio_write(pi, ARMED_LED, 0);
+					saveMeasurements=false;
+					file_close(pi, file_handle);
+					generateNewFile();
+					state = OPEN;
+				}
 				break;
+		}
+	}
+
+	if(saveMeasurements){
+		char str[300];
+		readMPU6050(pi, i2c_handle);
+		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+		printf(str);
+
+		int i=0;
+		while(str[i] != '\0'){
+			i++;
+		}
+
+		if(file_write(pi, file_handle, str, i) == 0){
+			//printf("Stored to file sucessfully\n");
+		}
+		else{
+			printf("Unable to save to file\n");
 		}
 	}
 
 	time_sleep(0.05);
 }
 
-void *saveMeasurements(){
-	while(true){
-		if(state == ARMED || state == FLYING || state == FLYING_OPEN){
-			char str[300];
-			readMPU6050(pi, i2c_handle);
-			sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
-			printf(str);
-
-			int i=0;
-			while(str[i] != '\0'){
-				i++;
-			}
-
-			if(file_write(pi, file_handle, str, i) == 0){
-				//printf("Stored to file sucessfully\n");
-			}
-			else{
-				printf("Unable to save to file\n");
-			}
-		}
-
-		time_sleep(0.05);
-	}
-
-}
 
 bool init(){
 	// init gpio client
@@ -302,8 +301,6 @@ void readMPU6050(){
 
 void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 	if(edge == RISING_EDGE){
-		printf("button pressed\n");
-
 		if(state == OPEN){
 			state = SHAKING;
 		}
@@ -316,8 +313,6 @@ void button_cb(int pi, unsigned user_gpio, unsigned edge, uint32_t tick){
 		}
 	}
 	else if(edge == FALLING_EDGE){
-		printf("button released\n");
-
 		if(state == SHAKING){
 			state = CLOSING;
 		}
