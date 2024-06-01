@@ -23,6 +23,8 @@
 // global variables
 int pi;
 int i2c_handle;
+int file_handle;
+int thread_pointer;
 
 enum State {OPEN, SHAKING, CLOSING, LOADED, ARMED, UNARMED, OPENING, FLYING, FLYING_OPEN};
 enum State state = OPEN;
@@ -30,6 +32,7 @@ enum State state = OPEN;
 uint32_t last_rising_tick;
 bool button_pressed;
 
+uint32_t timestamp;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
 double temp = 0.0;
 
@@ -83,7 +86,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 1);
-						start_thread(saveMesurements, NULL);
+						thread_pointer = (saveMesurements, NULL);
 						state = ARMED;
 					}
 				}
@@ -96,7 +99,7 @@ int main(){
 						button_pressed = false;
 
 						gpio_write(pi, ARMED_LED, 0);
-						stop_thread(saveMesurements);
+						stop_thread(thread_pointer);
 						file_close(pi, file_handle);
 						generateNewFile();
 						state = UNARMED;
@@ -137,7 +140,7 @@ int main(){
 				gpio_write(pi, LOADED_LED, 0);
 
 				time_sleep(15);
-				stop_thread(saveMesurements);
+				stop_thread(thread_pointer);
 				file_close(pi, file_handle);
 				generateNewFile();
 				state = OPEN;
