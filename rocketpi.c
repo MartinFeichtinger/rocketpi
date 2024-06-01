@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <pigpiod_if2.h>
 #include <signal.h>
 
@@ -37,6 +38,7 @@ bool saveMeasurements = false;
 uint32_t timestamp;
 int flyingState=0;
 int16_t accX, accY, accZ, gyrX, gyrY, gyrZ, tVal;
+int16_t acc;
 double temp = 0.0;
 
 // function prototypes
@@ -108,7 +110,7 @@ int main(){
 				}
 
 				// if accelerations is detected
-				if(accX >= 1000){
+				if(acc >= 2*981){
 					timer_start = get_current_tick(pi);
 					flyingState=1;
 					state = FLYING;
@@ -164,7 +166,7 @@ int main(){
 		timestamp=get_current_tick(pi)/1000;
 		char str[300];
 		readMPU6050(pi, i2c_handle);
-		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, flyingState, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
+		sprintf(str, "%d	%d	%d	%d	%d	%d	%d	%d	%d	%.2f\n", timestamp, flyingState, acc, accX, accY, accZ, gyrX, gyrY, gyrZ, temp);
 		printf(str);
 
 		int i=0;
@@ -231,7 +233,7 @@ bool init(){
 	// init mpu6050
 	i2c_write_byte_data(pi, i2c_handle, 0x6B, 0x00);	// wake up mpu6050
 	i2c_write_byte_data(pi, i2c_handle, 0x1B, 0x08);	// set full scale range of gyroscope to +-500°/s
-	i2c_write_byte_data(pi, i2c_handle, 0x1C, 0x08);	// set full scale range of accelerometer to +-4g
+	i2c_write_byte_data(pi, i2c_handle, 0x1C, 0x18);	// set full scale range of accelerometer to +-16g
 	//i2c_write_byte_data(pi, i2c_handle, 0x19, 0x07);	// set sample rate to 1kHz
 	i2c_write_byte_data(pi, i2c_handle, 0x1A, 0x00);	// set digital low pass filter to 260Hz
 	i2c_write_byte_data(pi, i2c_handle, 0x6C, 0x00);	// disable sleep mode
@@ -271,7 +273,7 @@ bool generateNewFile(){
 	file_handle = file_open(pi, outputFile, PI_FILE_WRITE);
 	if(file_handle >= 0){
 		printf("File opend succesfully\n\n");
-		char init_headline[] = {"time	state	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
+		char init_headline[] = {"time	state	acc	accX	accY	accZ	gyrX	gyrY	gyrZ	temp\n"};
 
 		if(file_write(pi, file_handle, init_headline, sizeof(init_headline)-1) == 0){
 			printf(init_headline);
@@ -295,6 +297,7 @@ void readMPU6050(){
 	accX = i2c_read_byte_data(pi, i2c_handle, 0x3B) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x3C);
 	accY = i2c_read_byte_data(pi, i2c_handle, 0x3D) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x3E);
 	accZ = i2c_read_byte_data(pi, i2c_handle, 0x3F) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x40);
+	acc = sqrt(accX*accX + accY*accY + accZ*accZ);
 	
 	// read gyroscope values
 	gyrX = i2c_read_byte_data(pi, i2c_handle, 0x43) << 8 | i2c_read_byte_data(pi, i2c_handle, 0x44);
