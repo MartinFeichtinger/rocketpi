@@ -132,7 +132,7 @@ int main(){
 				break;
 
 			case FLYING:
-				if(get_current_tick(pi) >= timer_start + 3000*1000){
+				if(get_current_tick(pi) >= timer_start + 2000*1000){
 					timer_start = get_current_tick(pi);
 					flyingState=2;
 					state = FLYING_OPEN;
@@ -151,7 +151,7 @@ int main(){
                                         flyingState=3;
 				}
 
-				if(get_current_tick(pi) >= timer_start + 150000*1000){
+				if(get_current_tick(pi) >= timer_start + 15000*1000){
 					gpio_write(pi, ARMED_LED, 0);
 					saveMeasurements=false;
 					flyingState=0;
