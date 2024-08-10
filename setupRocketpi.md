@@ -17,8 +17,9 @@ This projekt is developed for a **Raspberry Pi Zero 2W**. You can also use an Ra
 
 ## Further configurations
 - connect to the Raspi via ssh (`ssh pi@rocketpi-xx.local`) 
-- open `raspi.config` and activate `i2c` and `Serial`
-- close `raspi.config` and reboot
+- open `raspi-config` and activate `i2c` and `Serial`
+- change the time zone to your local time. (you can check the time with the comand `date`)
+- close `raspi-config` and reboot
 
 ## Clone Rocketpi-Projekt
 - install git: `sudo apt install git`
