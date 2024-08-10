@@ -110,7 +110,7 @@ int main(){
 				}
 
 				// if accelerations is detected
-				if(acc >= 2*981){
+				if(acc >= 2*9810){
 					timer_start = get_current_tick(pi);
 					flyingState=1;
 					state = FLYING;
@@ -132,7 +132,7 @@ int main(){
 				break;
 
 			case FLYING:
-				if(get_current_tick(pi) >= timer_start + 4000*1000){
+				if(get_current_tick(pi) >= timer_start + 2000*1000){
 					timer_start = get_current_tick(pi);
 					flyingState=2;
 					state = FLYING_OPEN;
@@ -151,7 +151,7 @@ int main(){
                                         flyingState=3;
 				}
 
-				if(get_current_tick(pi) >= timer_start + 10000*1000){
+				if(get_current_tick(pi) >= timer_start + 15000*1000){
 					gpio_write(pi, ARMED_LED, 0);
 					saveMeasurements=false;
 					flyingState=0;
@@ -233,7 +233,7 @@ bool init(){
 	// init mpu6050
 	i2c_write_byte_data(pi, i2c_handle, 0x6B, 0x00);	// wake up mpu6050
 	i2c_write_byte_data(pi, i2c_handle, 0x1B, 0x08);	// set full scale range of gyroscope to +-500°/s
-	i2c_write_byte_data(pi, i2c_handle, 0x1C, 0x18);	// set full scale range of accelerometer to +-16g
+	i2c_write_byte_data(pi, i2c_handle, 0x1C, 0x08);	// set full scale range of accelerometer to +-4g
 	//i2c_write_byte_data(pi, i2c_handle, 0x19, 0x07);	// set sample rate to 1kHz
 	i2c_write_byte_data(pi, i2c_handle, 0x1A, 0x00);	// set digital low pass filter to 260Hz
 	i2c_write_byte_data(pi, i2c_handle, 0x6C, 0x00);	// disable sleep mode
