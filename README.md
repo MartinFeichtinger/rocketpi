@@ -14,11 +14,12 @@ The parachute is attached to the top of the water rocket. To eject the parachute
 -image of the water rocket
 
 ## Rocket launcher
-<img width="960" height="1280" alt="image" src="https://github.com/user-attachments/assets/5da3e651-4a59-48bb-96ba-272ecdfd00e5" />
+<img width="960" height="1280" alt="image" src="https://github.com/user-attachments/assets/5da3e651-4a59-48bb-96ba-272ecdfd00e5" width="600">
+
 The rocket launcher had already been built beforehand. It also allows the rocket to be filled. Two ball valves can be used to switch between water and compressed air. The water rockets can then be launched by pulling a string.
 
 ## Rocketpi
-<img src="https://github.com/MartinFeichtinger/rocketpi/assets/110301453/470a3fbe-7be8-42d9-b14c-0852b10e2277" width="500">
+<img src="https://github.com/MartinFeichtinger/rocketpi/assets/110301453/470a3fbe-7be8-42d9-b14c-0852b10e2277" width="600">
 
 ### Raspberry Pi Zero
 The Raspberry Pi Zero is a tiny, affordable computer board developed by the Raspberry Pi Foundation. It's small but powerful, with features like a CPU, RAM, storage, and ports for connecting to displays and other devices. It's used for various projects like IoT, robotics, and gaming consoles due to its low cost and versatility.
